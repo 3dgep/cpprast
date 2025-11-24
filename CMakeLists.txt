@@ -17,8 +17,8 @@ if(MSVC)
 endif(MSVC)
 
 add_subdirectory(externals EXCLUDE_FROM_ALL)
-add_subdirectory(math)
-add_subdirectory(graphics)
+# add_subdirectory(math)
+# add_subdirectory(graphics)
 
 if(CPPRAST_BUILD_SAMPLES)
     add_subdirectory(samples)
