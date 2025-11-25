@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...4.20)
+cmake_minimum_required(VERSION 3.15...4.2)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(CPPRAST_BUILD_SAMPLES "Build samples." ON)
@@ -18,7 +18,7 @@ endif(MSVC)
 
 add_subdirectory(externals EXCLUDE_FROM_ALL)
 # add_subdirectory(math)
-# add_subdirectory(graphics)
+add_subdirectory(graphics)
 
 if(CPPRAST_BUILD_SAMPLES)
     add_subdirectory(samples)
