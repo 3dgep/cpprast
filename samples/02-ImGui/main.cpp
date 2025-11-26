@@ -43,7 +43,9 @@ int main()
             }  // switch(e.type)
         }  // while (SDL_PollEvent(&e))
 
-        ImGui::ShowDemoWindow();
+        // Only show the demo window if the window has a valid imgui context.
+        if ( window.setCurrent() )
+            ImGui::ShowDemoWindow();
 
         // Clear the screen.
         window.clear( 154, 206, 235 );

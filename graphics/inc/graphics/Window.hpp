@@ -6,6 +6,9 @@
 
 #include <string_view>
 
+// Forward declaration to avoid including imgui headers in this file.
+struct ImGuiContext;
+
 namespace cpprast
 {
 inline namespace graphics
@@ -47,12 +50,16 @@ public:
 
     bool isVSync() const noexcept;
 
+    // Set this window as the current ImGui context.
+    bool setCurrent();
+
 private:
     static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
     void                beginFrame();  // Begin a new ImGui frame.
 
-    SDL_Window*   m_Window   = nullptr;
-    SDL_Renderer* m_Renderer = nullptr;
+    SDL_Window*   m_Window       = nullptr;
+    SDL_Renderer* m_Renderer     = nullptr;
+    ImGuiContext* m_ImGuiContext = nullptr;  // Each window has its own ImGui context.
 
     int  m_Width      = -1;
     int  m_Height     = -1;

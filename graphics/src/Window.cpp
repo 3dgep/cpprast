@@ -37,64 +37,6 @@ private:
     }
 };
 
-struct ImGui_Context
-{
-    static ImGui_Context& get()
-    {
-        static ImGui_Context instance;
-        return instance;
-    }
-
-private:
-    // ReSharper disable once CppParameterMayBeConstPtrOrRef
-    static bool SDLCALL eventWatch( void* /*userdata*/, SDL_Event* event )
-    {
-        ImGui_ImplSDL3_ProcessEvent( event );
-        return true;
-    }
-
-    ImGui_Context()
-    {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-
-        // Setup Dear ImGui context
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable multiple window/viewports. NOTE: SDL3 backend does not currently support Multi-viewports.
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        // ImGui::StyleColorsLight();
-
-        // Setup initial scaling
-        float primaryDisplayScale = SDL_GetDisplayContentScale( SDL_GetPrimaryDisplay() );
-
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.ScaleAllSizes( primaryDisplayScale );        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-        style.FontScaleDpi         = primaryDisplayScale;  // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
-        io.ConfigDpiScaleViewports = true;                 // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
-
-        SDL_AddEventWatch( &eventWatch, this );
-    }
-
-    ~ImGui_Context()
-    {
-        // Cleanup
-        SDL_RemoveEventWatch( &eventWatch, this );
-        ImGui_ImplSDLRenderer3_Shutdown();
-        ImGui_ImplSDL3_Shutdown();
-        ImGui::DestroyContext();
-    }
-
-    // Make sure the event watcher is only added once.
-    std::once_flag m_OnceFlag;
-};
-
 Window::~Window()
 {
     destroy();
@@ -108,6 +50,7 @@ Window::Window( std::string_view title, int width, int height, bool fullscreen )
 Window::Window( Window&& window ) noexcept
 : m_Window( std::exchange( window.m_Window, nullptr ) )
 , m_Renderer( std::exchange( window.m_Renderer, nullptr ) )
+, m_ImGuiContext( std::exchange( window.m_ImGuiContext, nullptr ) )
 , m_Width( std::exchange( window.m_Width, -1 ) )
 , m_Height( std::exchange( window.m_Height, -1 ) )
 , m_Fullscreen( std::exchange( window.m_Fullscreen, false ) )
@@ -119,12 +62,13 @@ Window& Window::operator=( Window&& window ) noexcept
     if ( this == &window )
         return *this;
 
-    m_Window     = std::exchange( window.m_Window, nullptr );
-    m_Renderer   = std::exchange( window.m_Renderer, nullptr );
-    m_Width      = std::exchange( window.m_Width, -1 );
-    m_Height     = std::exchange( window.m_Height, -1 );
-    m_Fullscreen = std::exchange( window.m_Fullscreen, false );
-    m_VSync      = std::exchange( window.m_VSync, true );
+    m_Window       = std::exchange( window.m_Window, nullptr );
+    m_Renderer     = std::exchange( window.m_Renderer, nullptr );
+    m_ImGuiContext = std::exchange( window.m_ImGuiContext, nullptr );
+    m_Width        = std::exchange( window.m_Width, -1 );
+    m_Height       = std::exchange( window.m_Height, -1 );
+    m_Fullscreen   = std::exchange( window.m_Fullscreen, false );
+    m_VSync        = std::exchange( window.m_VSync, true );
 
     return *this;
 }
@@ -167,8 +111,29 @@ void Window::create( std::string_view title, int width, int height, bool fullScr
 
     resize( width, height );
 
-    // The imgui context must be created after the Window and renderer have been created.
-    static ImGui_Context& ImGui_context = ImGui_Context::get();  // Ensure a single, static ImGui context before creating an SDL window.
+    // Each window has its own ImGui context.
+    m_ImGuiContext = ImGui::CreateContext();
+
+    // Set the current context to this window's ImGui context.
+    ImGui::SetCurrentContext( m_ImGuiContext );
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable multiple window/viewports. NOTE: SDL3 backend does not currently support Multi-viewports.
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+
+    // Setup initial scaling
+    float primaryDisplayScale = SDL_GetDisplayContentScale( SDL_GetDisplayForWindow( m_Window ) );
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes( primaryDisplayScale );        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+    style.FontScaleDpi         = primaryDisplayScale;  // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+    io.ConfigDpiScaleViewports = true;                 // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
 
     // Setup Platform/Renderer backends for ImGui.
     ImGui_ImplSDL3_InitForSDLRenderer( m_Window, m_Renderer );
@@ -233,17 +198,38 @@ bool Window::isVSync() const noexcept
     return m_VSync;
 }
 
+bool Window::setCurrent()
+{
+    if ( m_ImGuiContext )
+    {
+        ImGui::SetCurrentContext( m_ImGuiContext );
+        return true;
+    }
+    return false;
+}
+
 void Window::destroy()
 {
     SDL_RemoveEventWatch( &Window::eventWatch, this );
 
-    SDL_DestroyRenderer( m_Renderer );
-    SDL_DestroyWindow( m_Window );
+    if ( m_ImGuiContext )
+    {
+        ImGui::SetCurrentContext( m_ImGuiContext );
+        ImGui_ImplSDLRenderer3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext( m_ImGuiContext );
+    }
 
-    m_Window   = nullptr;
-    m_Renderer = nullptr;
-    m_Width    = -1;
-    m_Height   = -1;
+    if ( m_Renderer )
+        SDL_DestroyRenderer( m_Renderer );
+    if ( m_Window )
+        SDL_DestroyWindow( m_Window );
+
+    m_Window       = nullptr;
+    m_Renderer     = nullptr;
+    m_ImGuiContext = nullptr;
+    m_Width        = -1;
+    m_Height       = -1;
 }
 
 void Window::clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha )
@@ -259,6 +245,8 @@ void Window::present()
 {
     if ( !m_Renderer )
         return;
+
+    ImGui::SetCurrentContext( m_ImGuiContext );
 
     // ImGui rendering
     ImGui::Render();
@@ -285,6 +273,10 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
 {
     Window* self = static_cast<Window*>( userdata );
 
+    // Update the ImGui context for this window.
+    ImGui::SetCurrentContext( self->m_ImGuiContext );
+    ImGui_ImplSDL3_ProcessEvent( event );
+
     switch ( event->type )
     {
     case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -302,6 +294,19 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
             self->m_Height = event->window.data2;
         }
         break;
+    case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+    case SDL_EVENT_DISPLAY_CONTENT_SCALE_CHANGED:
+    {
+        SDL_DisplayID id    = SDL_GetDisplayForWindow( self->m_Window );
+        float         scale = SDL_GetDisplayContentScale( id );
+        // Change ImGui styles for the new display scale.
+        ImGuiStyle style;
+        ImGui::StyleColorsDark( &style );
+        style.ScaleAllSizes( scale );  // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+        style.FontScaleDpi = scale;    // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+        ImGui::GetStyle()  = style;
+    }
+    break;
     }
 
     return true;
@@ -310,6 +315,8 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
 void Window::beginFrame()
 {
     // Start the Dear ImGui frame
+    ImGui::SetCurrentContext( m_ImGuiContext );
+
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
