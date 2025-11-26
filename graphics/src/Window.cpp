@@ -3,6 +3,11 @@
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_log.h>
 
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
+#include <mutex>
+
 #include <stdexcept>
 #include <utility>  // for std::exchange
 
@@ -30,6 +35,64 @@ private:
     {
         SDL_Quit();
     }
+};
+
+struct ImGui_Context
+{
+    static ImGui_Context& get()
+    {
+        static ImGui_Context instance;
+        return instance;
+    }
+
+private:
+    // ReSharper disable once CppParameterMayBeConstPtrOrRef
+    static bool SDLCALL eventWatch( void* /*userdata*/, SDL_Event* event )
+    {
+        ImGui_ImplSDL3_ProcessEvent( event );
+        return true;
+    }
+
+    ImGui_Context()
+    {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable multiple window/viewports. NOTE: SDL3 backend does not currently support Multi-viewports.
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        // ImGui::StyleColorsLight();
+
+        // Setup initial scaling
+        float primaryDisplayScale = SDL_GetDisplayContentScale( SDL_GetPrimaryDisplay() );
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.ScaleAllSizes( primaryDisplayScale );        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+        style.FontScaleDpi         = primaryDisplayScale;  // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+        io.ConfigDpiScaleViewports = true;                 // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+
+        SDL_AddEventWatch( &eventWatch, this );
+    }
+
+    ~ImGui_Context()
+    {
+        // Cleanup
+        SDL_RemoveEventWatch( &eventWatch, this );
+        ImGui_ImplSDLRenderer3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+    }
+
+    // Make sure the event watcher is only added once.
+    std::once_flag m_OnceFlag;
 };
 
 Window::~Window()
@@ -78,7 +141,7 @@ Window::operator bool() const
 
 void Window::create( std::string_view title, int width, int height, bool fullScreen )
 {
-    static SDL_Context& context = SDL_Context::get();  // Ensure a single, static context before creating an SDL window.
+    static SDL_Context& SDL_context = SDL_Context::get();  // Ensure a single, static context before creating an SDL window.
 
     if ( m_Window )
         destroy();  // Destroy existing window if any.
@@ -103,6 +166,15 @@ void Window::create( std::string_view title, int width, int height, bool fullScr
     SDL_SetRenderVSync( m_Renderer, m_VSync ? 1 : 0 );
 
     resize( width, height );
+
+    // The imgui context must be created after the Window and renderer have been created.
+    static ImGui_Context& ImGui_context = ImGui_Context::get();  // Ensure a single, static ImGui context before creating an SDL window.
+
+    // Setup Platform/Renderer backends for ImGui.
+    ImGui_ImplSDL3_InitForSDLRenderer( m_Window, m_Renderer );
+    ImGui_ImplSDLRenderer3_Init( m_Renderer );
+
+    beginFrame();
 }
 
 void Window::resize( int width, int height )
@@ -188,6 +260,16 @@ void Window::present()
     if ( !m_Renderer )
         return;
 
+    // ImGui rendering
+    ImGui::Render();
+
+    // Update for multiple viewports
+    // Note: Multi-viewports are not yet supported with the SDL3 backend.
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+
+    ImGui_ImplSDLRenderer3_RenderDrawData( ImGui::GetDrawData(), m_Renderer );
+
     if ( !SDL_RenderPresent( m_Renderer ) )
     {
         SDL_LogError( SDL_LOG_CATEGORY_APPLICATION, "Failed to present: %s", SDL_GetError() );
@@ -195,6 +277,8 @@ void Window::present()
 
     if ( m_Close )
         destroy();
+    else
+        beginFrame();
 }
 
 bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
@@ -204,7 +288,7 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
     switch ( event->type )
     {
     case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-        if ( SDL_GetWindowFromEvent( event ) == self->m_Window )
+        if ( event->window.windowID == SDL_GetWindowID( self->m_Window ) )
         {
             self->m_Close = true;  // Mark the window to be closed.
             // Note: Destroying the window here will cause a crash later in the event processing.
@@ -212,7 +296,7 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
         }
         break;
     case SDL_EVENT_WINDOW_RESIZED:
-        if (SDL_GetWindowFromEvent( event ) == self->m_Window )
+        if ( event->window.windowID == SDL_GetWindowID( self->m_Window ) )
         {
             self->m_Width  = event->window.data1;
             self->m_Height = event->window.data2;
@@ -221,4 +305,12 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
     }
 
     return true;
+}
+
+void Window::beginFrame()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
 }

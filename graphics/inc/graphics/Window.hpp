@@ -49,6 +49,7 @@ public:
 
 private:
     static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
+    void                beginFrame();  // Begin a new ImGui frame.
 
     SDL_Window*   m_Window   = nullptr;
     SDL_Renderer* m_Renderer = nullptr;
