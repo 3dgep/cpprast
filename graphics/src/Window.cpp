@@ -4,9 +4,9 @@
 #include <SDL3/SDL_log.h>
 
 #include <imgui.h>
+#include <imgui_internal.h> // for ImGuiContext
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
-#include <mutex>
 
 #include <stdexcept>
 #include <utility>  // for std::exchange
@@ -113,7 +113,8 @@ void Window::create( std::string_view title, int width, int height, bool fullScr
 
     // Each window has its own ImGui context.
     m_ImGuiContext = ImGui::CreateContext();
-
+    // Name the context the same as the window title. Note: Use ImGui::SetContextName when it gets merged into the docking branch.
+    ImStrncpy( m_ImGuiContext->ContextName, title.data(), IM_ARRAYSIZE( m_ImGuiContext->ContextName ) );  // NOLINT(bugprone-suspicious-stringview-data-usage)
     // Set the current context to this window's ImGui context.
     ImGui::SetCurrentContext( m_ImGuiContext );
 
@@ -248,7 +249,6 @@ void Window::present()
 
     ImGui::SetCurrentContext( m_ImGuiContext );
 
-    IMGUI_DEBUG_LOG( "Render()\n" );
     // ImGui rendering
     ImGui::Render();
 
@@ -273,6 +273,8 @@ void Window::present()
 bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
 {
     Window* self = static_cast<Window*>( userdata );
+
+    ImGuiContext* previousContext = ImGui::GetCurrentContext();
 
     // Update the ImGui context for this window.
     ImGui::SetCurrentContext( self->m_ImGuiContext );
@@ -310,6 +312,9 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
     break;
     }
 
+    // Restore the previous context.
+    ImGui::SetCurrentContext( previousContext );
+
     return true;
 }
 
@@ -317,7 +322,6 @@ void Window::beginFrame()
 {
     // Start the Dear ImGui frame
     ImGui::SetCurrentContext( m_ImGuiContext );
-    IMGUI_DEBUG_LOG( "NewFrame()\n" );
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
