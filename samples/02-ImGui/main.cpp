@@ -11,6 +11,7 @@ using namespace cpprast;
 int main()
 {
     Window window( TITLE, SCREEN_WIDTH, SCREEN_HEIGHT );
+    Window window2( "Second Window", SCREEN_WIDTH, SCREEN_HEIGHT );
 
     while ( window )
     {
@@ -47,9 +48,16 @@ int main()
         if ( window.setCurrent() )
             ImGui::ShowDemoWindow();
 
+        if ( window2.setCurrent() )
+            ImGui::ShowDemoWindow();
+
         // Clear the screen.
         window.clear( 154, 206, 235 );
         window.present();
+
+        window2.clear( 255, 255, 255 );
+        window2.present();
+
     }  // while(running)
 
     return 0;
