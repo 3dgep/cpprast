@@ -13,10 +13,13 @@ int main()
     while ( window )
     {
         SDL_Event e;
-        while ( window.pollEvent( e ) )  // Poll for any new events on the event queue.
+        while ( SDL_PollEvent( &e ) )  // Poll for any new events on the event queue.
         {
             switch ( e.type )
             {
+            case SDL_EVENT_QUIT:  // Closing the window quits the application
+                window.destroy();
+                break;
             case SDL_EVENT_KEY_DOWN:
                 switch ( e.key.key )
                 {
@@ -33,15 +36,14 @@ int main()
                         window.toggleFullscreen();
                     }
                     break;
-                }
+                }  // switch (e.key.key)
                 break;  // SDL_EVENT_KEY_DOWN
             }  // switch(e.type)
-        }
+        }  // while (SDL_PollEvent(&e))
 
         // Clear the screen.
-        window.clear( 154, 206, 235, 255 );
+        window.clear( 154, 206, 235 );
         window.present();
-
     }  // while(running)
 
     return 0;

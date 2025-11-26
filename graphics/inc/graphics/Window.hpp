@@ -1,4 +1,4 @@
-#pragma once // Always at the top of header files.
+#pragma once  // Always at the top of header files.
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_render.h>
@@ -22,12 +22,13 @@ public:
 
     Window& operator=( const Window& ) = delete;  // Delete copy assignment
     Window& operator=( Window&& window ) noexcept;
+
     explicit operator bool() const;  // Allow conversion to bool.
+
+    bool isValid() const;
 
     void create( std::string_view title, int width, int height, bool fullScreen = false );
     void destroy();
-
-    bool pollEvent( SDL_Event& event );
 
     void clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 );
     void present();
@@ -47,6 +48,8 @@ public:
     bool isVSync() const noexcept;
 
 private:
+    static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
+
     SDL_Window*   m_Window   = nullptr;
     SDL_Renderer* m_Renderer = nullptr;
 
@@ -54,6 +57,7 @@ private:
     int  m_Height     = -1;
     bool m_Fullscreen = false;
     bool m_VSync      = true;
+    bool m_Close      = false;
 };
 
 }  // namespace graphics
