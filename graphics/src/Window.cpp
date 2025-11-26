@@ -248,6 +248,7 @@ void Window::present()
 
     ImGui::SetCurrentContext( m_ImGuiContext );
 
+    IMGUI_DEBUG_LOG( "Render()\n" );
     // ImGui rendering
     ImGui::Render();
 
@@ -316,7 +317,7 @@ void Window::beginFrame()
 {
     // Start the Dear ImGui frame
     ImGui::SetCurrentContext( m_ImGuiContext );
-
+    IMGUI_DEBUG_LOG( "NewFrame()\n" );
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
