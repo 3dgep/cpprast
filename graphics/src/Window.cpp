@@ -274,10 +274,23 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
 {
     Window* self = static_cast<Window*>( userdata );
 
-    ImGuiContext* previousContext = ImGui::GetCurrentContext();
+    // A RAII helper to switch and restore ImGui contexts.
+    struct ContextSwitcher
+    {
+        ContextSwitcher( ImGuiContext* newContext )
+        {
+            previousContext = ImGui::GetCurrentContext();
+            ImGui::SetCurrentContext( newContext );
+        }
 
-    // Update the ImGui context for this window.
-    ImGui::SetCurrentContext( self->m_ImGuiContext );
+        // Restore the previous context when the switcher goes out of scope.
+        ~ContextSwitcher()
+        {
+            ImGui::SetCurrentContext( previousContext );
+        }
+        ImGuiContext* previousContext;
+    } switcher(self->m_ImGuiContext);
+
     ImGui_ImplSDL3_ProcessEvent( event );
 
     switch ( event->type )
@@ -311,9 +324,6 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
     }
     break;
     }
-
-    // Restore the previous context.
-    ImGui::SetCurrentContext( previousContext );
 
     return true;
 }
