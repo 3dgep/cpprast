@@ -33,6 +33,8 @@ public:
     void create( std::string_view title, int width, int height, bool fullScreen = false );
     void destroy();
 
+    void close();
+
     void clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 );
     void present();
 
@@ -55,11 +57,13 @@ public:
 
 private:
     static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
-    void                beginFrame();  // Begin a new ImGui frame.
 
-    SDL_Window*   m_Window       = nullptr;
-    SDL_Renderer* m_Renderer     = nullptr;
-    ImGuiContext* m_ImGuiContext = nullptr;  // Each window has its own ImGui context.
+    // Begin a new ImGui frame.
+    void beginFrame();
+
+    SDL_Window*   m_Window   = nullptr;
+    SDL_Renderer* m_Renderer = nullptr;
+    ImGuiContext* m_ImGuiContext = nullptr;
 
     int  m_Width      = -1;
     int  m_Height     = -1;

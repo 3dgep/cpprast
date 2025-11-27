@@ -4,9 +4,9 @@
 #include <SDL3/SDL_log.h>
 
 #include <imgui.h>
-#include <imgui_internal.h> // for ImGuiContext
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
+#include <imgui_internal.h>  // for ImGuiContext
 
 #include <stdexcept>
 #include <utility>  // for std::exchange
@@ -134,7 +134,8 @@ void Window::create( std::string_view title, int width, int height, bool fullScr
     ImGuiStyle& style = ImGui::GetStyle();
     style.ScaleAllSizes( primaryDisplayScale );        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
     style.FontScaleDpi         = primaryDisplayScale;  // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
-    io.ConfigDpiScaleViewports = true;                 // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+    io.ConfigDpiScaleViewports = true;                 // [EXPERIMENTAL] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+    io.ConfigDpiScaleFonts     = true;                 // [EXPERIMENTAL] Automatically overwrite style.FontScaleDpi when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
 
     // Setup Platform/Renderer backends for ImGui.
     ImGui_ImplSDL3_InitForSDLRenderer( m_Window, m_Renderer );
@@ -233,6 +234,16 @@ void Window::destroy()
     m_Height       = -1;
 }
 
+void Window::close()
+{
+    if ( !m_Window )
+        return;
+
+    m_Close = true;
+    // Just hide the window until it's destroyed.
+    SDL_HideWindow( m_Window );
+}
+
 void Window::clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha )
 {
     if ( !m_Renderer )
@@ -264,10 +275,7 @@ void Window::present()
         SDL_LogError( SDL_LOG_CATEGORY_APPLICATION, "Failed to present: %s", SDL_GetError() );
     }
 
-    if ( m_Close )
-        destroy();
-    else
-        beginFrame();
+    beginFrame();
 }
 
 bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
@@ -289,7 +297,7 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
             ImGui::SetCurrentContext( previousContext );
         }
         ImGuiContext* previousContext;
-    } switcher(self->m_ImGuiContext);
+    } switcher( self->m_ImGuiContext );
 
     ImGui_ImplSDL3_ProcessEvent( event );
 
@@ -298,9 +306,7 @@ bool SDLCALL Window::eventWatch( void* userdata, SDL_Event* event )
     case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
         if ( event->window.windowID == SDL_GetWindowID( self->m_Window ) )
         {
-            self->m_Close = true;  // Mark the window to be closed.
-            // Note: Destroying the window here will cause a crash later in the event processing.
-            // The actual destruction is deferred to present function.
+            self->close();  // Mark the window to be closed.
         }
         break;
     case SDL_EVENT_WINDOW_RESIZED:

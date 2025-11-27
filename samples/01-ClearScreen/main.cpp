@@ -18,13 +18,13 @@ int main()
             switch ( e.type )
             {
             case SDL_EVENT_QUIT:  // Closing the window quits the application
-                window.destroy();
+                window.close();
                 break;
             case SDL_EVENT_KEY_DOWN:
                 switch ( e.key.key )
                 {
                 case SDLK_ESCAPE:  // Escape key also quits the application
-                    window.destroy();
+                    window.close();
                     break;
                 case SDLK_V:
                     window.toggleVSync();

@@ -20,13 +20,13 @@ int main()
             switch ( e.type )
             {
             case SDL_EVENT_QUIT:  // Closing the window quits the application
-                window.destroy();
+                window.close();
                 break;
             case SDL_EVENT_KEY_DOWN:
                 switch ( e.key.key )
                 {
                 case SDLK_ESCAPE:  // Escape key also quits the application
-                    window.destroy();
+                    window.close();
                     break;
                 case SDLK_V:
                     window.toggleVSync();
@@ -43,9 +43,7 @@ int main()
             }  // switch(e.type)
         }  // while (SDL_PollEvent(&e))
 
-        // Only show the demo window if the window has a valid imgui context.
-        if ( window.setCurrent() )
-            ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
 
         // Clear the screen.
         window.clear( 154, 206, 235 );
