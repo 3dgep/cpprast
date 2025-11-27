@@ -135,7 +135,6 @@ void Window::create( std::string_view title, int width, int height, bool fullScr
     style.ScaleAllSizes( primaryDisplayScale );        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
     style.FontScaleDpi         = primaryDisplayScale;  // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
     io.ConfigDpiScaleViewports = true;                 // [EXPERIMENTAL] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
-    io.ConfigDpiScaleFonts     = true;                 // [EXPERIMENTAL] Automatically overwrite style.FontScaleDpi when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
 
     // Setup Platform/Renderer backends for ImGui.
     ImGui_ImplSDL3_InitForSDLRenderer( m_Window, m_Renderer );
