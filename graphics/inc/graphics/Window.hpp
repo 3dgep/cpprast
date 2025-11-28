@@ -1,13 +1,13 @@
 #pragma once  // Always at the top of header files.
 
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_video.h>
 
 #include <string_view>
 
-// Forward declaration to avoid including imgui headers in this file.
+// Forward declaration to avoid including headers in this file.
 struct ImGuiContext;
+struct SDL_Window;
+struct SDL_Renderer;
 
 namespace cpprast
 {
@@ -31,7 +31,7 @@ public:
     bool isValid() const;
 
     void create( std::string_view title, int width, int height, bool fullScreen = false );
-    void destroy();
+    void destroy() noexcept;
 
     void close();
 

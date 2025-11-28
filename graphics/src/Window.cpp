@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_log.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
@@ -209,28 +211,37 @@ bool Window::setCurrent()
     return false;
 }
 
-void Window::destroy()
+void Window::destroy() noexcept
 {
     SDL_RemoveEventWatch( &Window::eventWatch, this );
 
     if ( m_ImGuiContext )
     {
+        ImGuiContext* previousContext = ImGui::GetCurrentContext();
+        if ( previousContext == m_ImGuiContext )
+            previousContext = nullptr;
         ImGui::SetCurrentContext( m_ImGuiContext );
         ImGui_ImplSDLRenderer3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext( m_ImGuiContext );
+        m_ImGuiContext = nullptr;
+        // Restore previous context.
+        ImGui::SetCurrentContext( previousContext );
     }
 
     if ( m_Renderer )
+    {
         SDL_DestroyRenderer( m_Renderer );
+        m_Renderer = nullptr;
+    }
     if ( m_Window )
+    {
         SDL_DestroyWindow( m_Window );
+        m_Window = nullptr;
+    }
 
-    m_Window       = nullptr;
-    m_Renderer     = nullptr;
-    m_ImGuiContext = nullptr;
-    m_Width        = -1;
-    m_Height       = -1;
+    m_Width    = -1;
+    m_Height   = -1;
 }
 
 void Window::close()
@@ -254,7 +265,7 @@ void Window::clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha )
 
 void Window::present()
 {
-    if ( !m_Renderer )
+    if ( !m_ImGuiContext || !m_Renderer )
         return;
 
     ImGui::SetCurrentContext( m_ImGuiContext );
