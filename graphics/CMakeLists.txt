@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.15...4.2)
 
 set(INC_FILES
     inc/graphics/Color.hpp
+    inc/graphics/Image.hpp
     inc/graphics/Window.hpp
 )
 
 set(SRC_FILES
-    src/Window.cpp
     src/Color.cpp
+    src/Image.cpp
+    src/Window.cpp
 )
 
 set(IMGUI_INC_FILES

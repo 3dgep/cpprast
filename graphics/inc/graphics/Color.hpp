@@ -113,7 +113,7 @@ union Color
     static inline Color fromHSV( float H, float S = 1.0f, float V = 1.0f ) noexcept;
 
     uint32_t rgba;
-    struct Channels
+    struct RGBA
     {
         uint8_t r;
         uint8_t g;
