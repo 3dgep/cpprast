@@ -1,18 +1,14 @@
-cmake_minimum_required(VERSION 3.15...4.20)
+cmake_minimum_required(VERSION 4.0...4.2)
 
-macro( add_sample DIR_NAME )
-	add_subdirectory( ${DIR_NAME} )
-	set_target_properties( ${DIR_NAME}
-		PROPERTIES 
-			FOLDER samples
-			VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	)
+macro(add_sample DIR_NAME)
+    add_subdirectory(${DIR_NAME})
+    set_target_properties(${DIR_NAME}
+        PROPERTIES
+        FOLDER samples
+        DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DIR_NAME})
 endmacro()
 
-add_sample( 01-ClearScreen )
-add_sample( 02-ImGui )
-
-# Set the startup project in Visual Studio
-set_directory_properties( PROPERTIES
-	VS_STARTUP_PROJECT 02-ImGui
-)
+add_sample(01-ClearScreen)
+add_sample(02-ImGui)

@@ -14,13 +14,6 @@ inline namespace math
 {
 struct AABB
 {
-    AABB()                                  = default;
-    ~AABB()                                 = default;
-    AABB( const AABB& ) noexcept            = default;
-    AABB( AABB&& ) noexcept                 = default;
-    AABB& operator=( const AABB& ) noexcept = default;
-    AABB& operator=( AABB&& ) noexcept      = default;
-
     /// <summary>
     /// Construct an axis-aligned bounding box from 2 points.
     /// </summary>
