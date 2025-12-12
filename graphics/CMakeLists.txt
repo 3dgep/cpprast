@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15...4.2)
 
 set(INC_FILES
+    inc/aligned_unique_ptr.hpp
+    inc/stb_image.h
+    inc/stb_image_write.h
     inc/graphics/BlendMode.hpp
     inc/graphics/Color.hpp
     inc/graphics/Image.hpp
@@ -12,6 +15,8 @@ set(SRC_FILES
     src/Color.cpp
     src/Image.cpp
     src/Window.cpp
+    src/stb_image.cpp
+    src/stb_image_write.cpp
 )
 
 set(IMGUI_INC_FILES

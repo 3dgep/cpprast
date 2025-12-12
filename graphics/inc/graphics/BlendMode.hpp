@@ -179,21 +179,21 @@ constexpr Color ComputeBlendFactor( const Color& src, const Color& dst, BlendFac
     case BlendFactor::SrcColor:
         return src;
     case BlendFactor::OneMinusSrcColor:
-        return { 255 - src.channels.r, 255 - src.channels.g, 255 - src.channels.b, 255 - src.channels.a };
+        return Color::White - src;
     case BlendFactor::DstColor:
         return dst;
     case BlendFactor::OneMinusDstColor:
-        return { 255 - dst.channels.r, 255 - dst.channels.g, 255 - dst.channels.b, 255 - dst.channels.a };
+        return Color::White - dst;
     case BlendFactor::SrcAlpha:
         return { src.channels.a, src.channels.a, src.channels.a, src.channels.a };
     case BlendFactor::OneMinusSrcAlpha:
-        return { 255 - src.channels.a, 255 - src.channels.a, 255 - src.channels.a, 255 - src.channels.a };
+        return Color::White - Color{ src.channels.a, src.channels.a, src.channels.a, src.channels.a };
     case BlendFactor::DstAlpha:
         return { dst.channels.a, dst.channels.a, dst.channels.a, dst.channels.a };
     case BlendFactor::OneMinusDstAlpha:
-        return { 255 - dst.channels.a, 255 - dst.channels.a, 255 - dst.channels.a, 255 - dst.channels.a };
+        return Color::White - Color{ dst.channels.a, dst.channels.a, dst.channels.a, dst.channels.a };
     case BlendFactor::SrcAlphaSat:
-        return min( Color{ src.channels.a, src.channels.a, src.channels.a, src.channels.a }, Color{ 255 - dst.channels.a, 255 - dst.channels.a, 255 - dst.channels.a, 255 - dst.channels.a } );
+        return min( Color{ src.channels.a, src.channels.a, src.channels.a, src.channels.a }, Color::White - Color{ dst.channels.a, dst.channels.a, dst.channels.a, dst.channels.a } );
     }
 
     return src;

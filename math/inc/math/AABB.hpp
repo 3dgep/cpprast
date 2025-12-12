@@ -15,6 +15,11 @@ inline namespace math
 struct AABB
 {
     /// <summary>
+    /// Default constructor for the AABB class.
+    /// </summary>
+    AABB() = default;
+
+    /// <summary>
     /// Construct an axis-aligned bounding box from 2 points.
     /// </summary>
     /// <param name="a">The first point.</param>
