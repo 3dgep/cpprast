@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15...4.2)
 set( INC_FILES
     inc/math/AABB.hpp
     inc/math/Math.hpp
+    inc/math/Rect.hpp
     inc/math/Viewport.hpp
 )
 

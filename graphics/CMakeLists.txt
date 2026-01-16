@@ -7,6 +7,8 @@ set(INC_FILES
     inc/graphics/BlendMode.hpp
     inc/graphics/Color.hpp
     inc/graphics/Image.hpp
+    inc/graphics/ResourceManager.hpp
+    inc/graphics/Sprite.hpp
     inc/graphics/Window.hpp
 )
 
@@ -14,6 +16,8 @@ set(SRC_FILES
     src/BlendMode.cpp
     src/Color.cpp
     src/Image.cpp
+    src/ResourceManager.cpp
+    src/Sprite.cpp
     src/Window.cpp
     src/stb_image.cpp
     src/stb_image_write.cpp
@@ -23,9 +27,7 @@ set(IMGUI_INC_FILES
     ../externals/imgui/imconfig.h
     ../externals/imgui/imgui.h
     ../externals/imgui/imgui_internal.h
-    ../externals/imgui/imstb_rectpack.h
-    ../externals/imgui/imstb_textedit.h
-    ../externals/imgui/imstb_truetype.h
+    ../externals/imgui/misc/freetype/imgui_freetype.h
 )
 
 set(IMGUI_SRC_FILES
@@ -34,6 +36,7 @@ set(IMGUI_SRC_FILES
     ../externals/imgui/imgui_draw.cpp
     ../externals/imgui/imgui_tables.cpp
     ../externals/imgui/imgui_widgets.cpp
+    ../externals/imgui/misc/freetype/imgui_freetype.cpp
 )
 
 set(IMGUI_BACKEND_FILES
@@ -63,6 +66,7 @@ add_library(graphics STATIC ${ALL_FILES})
 add_library(cpprast::graphics ALIAS graphics) # Add alias target.
 
 target_compile_features(graphics PUBLIC cxx_std_23)
+target_compile_definitions( graphics PRIVATE IMGUI_ENABLE_FREETYPE ) # Use Freetype for font rendering.
 
 target_include_directories(graphics
     PUBLIC inc
@@ -71,7 +75,7 @@ target_include_directories(graphics
 )
 
 target_link_libraries(graphics 
-    PUBLIC cpprast::math SDL3::SDL3
+    PUBLIC cpprast::math Freetype::Freetype SDL3::SDL3
 )
 
 # Warning level 4 and treat warnings as errors.
