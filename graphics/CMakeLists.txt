@@ -9,6 +9,7 @@ set(INC_FILES
     inc/graphics/Image.hpp
     inc/graphics/ResourceManager.hpp
     inc/graphics/Sprite.hpp
+    inc/graphics/SpriteAnimation.hpp
     inc/graphics/SpriteSheet.hpp
     inc/graphics/Window.hpp
 )
@@ -19,6 +20,7 @@ set(SRC_FILES
     src/Image.cpp
     src/ResourceManager.cpp
     src/Sprite.cpp
+    src/SpriteAnimation.cpp
     src/SpriteSheet.cpp
     src/Window.cpp
     src/stb_image.cpp

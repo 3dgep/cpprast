@@ -2,11 +2,8 @@
 
 #include "Sprite.hpp"
 
-#include <math/Rect.hpp>
-
 #include <span>
 #include <vector>
-#include <memory>
 
 namespace cpprast
 {
@@ -20,7 +17,7 @@ public:
     /// Sprites can be added to the spritesheet using the addSprite function.
     /// Note: When using this method, the rows & column counts will stay 0.
     /// </summary>
-    SpriteSheet()  = default;
+    SpriteSheet() = default;
 
     /// <summary>
     /// Constructs a sprite sheet by loading an image from a file and dividing it into a grid of sprites.
@@ -51,7 +48,6 @@ public:
     /// <param name="rects">Collection of rectangles defining the position and size of each sprite in the image.</param>
     /// <param name="blendMode">Blend mode to apply when rendering sprites from this sheet.</param>
     SpriteSheet( const std::filesystem::path& filePath, std::span<const math::RectI> rects, const BlendMode& blendMode = BlendMode {} );
-
 
     /// <summary>
     /// Constructs a sprite sheet from an existing image using explicit rectangle definitions for each sprite.
@@ -106,7 +102,7 @@ public:
     /// </summary>
     /// <param name="spriteId">The index of the sprite whose height is to be retrieved. Defaults to 0.</param>
     /// <returns>The height of the sprite at the given index, or 0 if the index is out of bounds.</returns>
-    int getSpriteHeight( size_t spriteId = 0) const noexcept
+    int getSpriteHeight( size_t spriteId = 0 ) const noexcept
     {
         if ( spriteId < m_Sprites.size() )
             return m_Sprites[spriteId].getHeight();
@@ -132,7 +128,7 @@ public:
     /// </summary>
     /// <param name="index">The position of the Sprite to access.</param>
     /// <returns>A reference to the Sprite at the given index.</returns>
-    const Sprite& operator[](size_t index) const noexcept;
+    const Sprite& operator[]( size_t index ) const noexcept;
 
     /// <summary>
     /// Accesses the sprite at the specified row and column indices.
@@ -149,4 +145,4 @@ private:
     std::vector<Sprite> m_Sprites;
 };
 }  // namespace graphics
-}  // namespace sr
+}  // namespace cpprast
