@@ -8,6 +8,7 @@ set(INC_FILES
     inc/graphics/Color.hpp
     inc/graphics/Image.hpp
     inc/graphics/ResourceManager.hpp
+    inc/graphics/SamplerState.hpp
     inc/graphics/Sprite.hpp
     inc/graphics/SpriteAnimation.hpp
     inc/graphics/SpriteSheet.hpp
@@ -20,6 +21,7 @@ set(SRC_FILES
     src/Color.cpp
     src/Image.cpp
     src/ResourceManager.cpp
+    src/SamplerState.cpp
     src/Sprite.cpp
     src/SpriteAnimation.cpp
     src/SpriteSheet.cpp
