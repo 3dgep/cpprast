@@ -11,6 +11,7 @@ set(INC_FILES
     inc/graphics/Sprite.hpp
     inc/graphics/SpriteAnimation.hpp
     inc/graphics/SpriteSheet.hpp
+    inc/graphics/TileMap.hpp
     inc/graphics/Window.hpp
 )
 
@@ -22,6 +23,7 @@ set(SRC_FILES
     src/Sprite.cpp
     src/SpriteAnimation.cpp
     src/SpriteSheet.cpp
+    src/TileMap.cpp
     src/Window.cpp
     src/stb_image.cpp
     src/stb_image_write.cpp
