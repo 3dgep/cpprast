@@ -12,3 +12,4 @@ endmacro()
 
 add_sample(01-ClearScreen)
 add_sample(02-ImGui)
+add_sample(03-Image)

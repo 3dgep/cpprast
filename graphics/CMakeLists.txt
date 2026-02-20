@@ -7,6 +7,7 @@ set(INC_FILES
     inc/graphics/BlendMode.hpp
     inc/graphics/Color.hpp
     inc/graphics/Image.hpp
+    inc/graphics/Rasterizer.hpp
     inc/graphics/ResourceManager.hpp
     inc/graphics/SamplerState.hpp
     inc/graphics/Sprite.hpp
@@ -20,6 +21,7 @@ set(SRC_FILES
     src/BlendMode.cpp
     src/Color.cpp
     src/Image.cpp
+    src/Rasterizer.cpp
     src/ResourceManager.cpp
     src/SamplerState.cpp
     src/Sprite.cpp

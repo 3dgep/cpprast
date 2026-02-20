@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Rect.hpp"
 #include "Viewport.hpp"
 
 #include <glm/common.hpp>  // For glm::min/glm::max
@@ -62,7 +63,19 @@ struct AABB
     explicit AABB( const math::Viewport& viewport )
     {
         min = glm::vec2 { viewport.x, viewport.y };
-        max = glm::vec2 { viewport.x + viewport.width - 1, viewport.y + viewport.height - 1 };
+        max = glm::vec2 { viewport.x + viewport.width - 1.0f, viewport.y + viewport.height - 1.0f };
+    }
+
+    /// <summary>
+    /// Construct an axis-aligned bounding box from a rectangle.
+    /// </summary>
+    /// <typeparam name="T">The type of the rectangle's coordinates.</typeparam>
+    /// <param name="rect">The rectangle used to construct the AABB.</param>
+    template<typename T>
+    explicit AABB( const math::Rect<T>& rect )
+    {
+        min = glm::vec2 { rect.left, rect.top };
+        max = glm::vec2 { rect.left + rect.width, rect.top + rect.height };
     }
 
     /// <summary>
@@ -320,6 +333,18 @@ struct AABB
     static AABB fromMinMax( const glm::vec2& min, const glm::vec2& max )
     {
         return { min, max };
+    }
+
+    /// <summary>
+    /// Creates an axis-aligned bounding box (AABB) from a rectangle.
+    /// </summary>
+    /// <typeparam name="T">The numeric type used for the rectangle's coordinates and dimensions.</typeparam>
+    /// <param name="rect">The rectangle to convert, specified by its left, top, width, and height.</param>
+    /// <returns>An AABB constructed from the rectangle's minimum point (top-left) and maximum point (bottom-right).</returns>
+    template<typename T>
+    static AABB fromRect( const math::Rect<T>& rect )
+    {
+        return { glm::vec2 { rect.left, rect.top }, glm::vec2 { rect.left + rect.width, rect.top + rect.height } };
     }
 
     glm::vec2 min { std::numeric_limits<float>::max() };

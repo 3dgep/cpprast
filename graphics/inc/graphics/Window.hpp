@@ -1,6 +1,9 @@
 #pragma once  // Always at the top of header files.
 
+#include "Image.hpp"
+
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_render.h>
 
 #include <string_view>
 
@@ -38,6 +41,8 @@ public:
     void clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 );
     void present();
 
+    void present( const Image& image );
+
     void resize( int width, int height );
 
     void setFullscreen( bool fullscreen );
@@ -61,8 +66,9 @@ private:
     // Begin a new ImGui frame.
     void beginFrame();
 
-    SDL_Window*   m_Window   = nullptr;
-    SDL_Renderer* m_Renderer = nullptr;
+    SDL_Window*   m_Window       = nullptr;
+    SDL_Renderer* m_Renderer     = nullptr;
+    SDL_Texture*  m_Texture      = nullptr;
     ImGuiContext* m_ImGuiContext = nullptr;
 
     int  m_Width      = -1;
