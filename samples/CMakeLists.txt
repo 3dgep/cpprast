@@ -10,6 +10,8 @@ macro(add_sample DIR_NAME)
     set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DIR_NAME})
 endmacro()
 
+add_sample(00-Common)
 add_sample(01-ClearScreen)
 add_sample(02-ImGui)
 add_sample(03-Image)
+add_sample(04-Sprite)

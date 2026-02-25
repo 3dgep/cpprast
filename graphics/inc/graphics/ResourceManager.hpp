@@ -2,7 +2,7 @@
 
 #include "Image.hpp"
 // #include "Font.hpp"
-// #include "SpriteSheet.hpp"
+ #include "SpriteSheet.hpp"
 
 #include <filesystem>  // For std::filesystem::path
 #include <memory>      // For std::shared_ptr
@@ -31,7 +31,7 @@ std::shared_ptr<Image> loadImage( const std::filesystem::path& filePath );
 /// <param name="margin">The space around the border of the sprite sheet in pixels. Default is 0.</param>
 /// <param name="blendMode">The blend mode to apply to the sprites. Default is no blending.</param>
 /// <returns>The loaded sprite sheet, or null if the sprite sheet couldn't be loaded.</returns>
-// std::shared_ptr<SpriteSheet> loadSpriteSheet( const std::filesystem::path& filePath, std::optional<int> spriteWidth = {}, std::optional<int> spriteHeight = {}, int padding = 0, int margin = 0, const BlendMode& blendMode = BlendMode {} );
+std::shared_ptr<SpriteSheet> loadSpriteSheet( const std::filesystem::path& filePath, std::optional<int> spriteWidth = {}, std::optional<int> spriteHeight = {}, int padding = 0, int margin = 0, const BlendMode& blendMode = BlendMode {} );
 
 /// <summary>
 /// Loads a sprite sheet from the specified file path, using the provided rectangles and blend mode.
@@ -40,7 +40,7 @@ std::shared_ptr<Image> loadImage( const std::filesystem::path& filePath );
 /// <param name="rects">A span of rectangles defining the regions of individual sprites within the sheet.</param>
 /// <param name="blendMode">The blend mode to use when rendering the sprite sheet. Blending is disabled if not specified.</param>
 /// <returns>A shared pointer to the loaded SpriteSheet object.</returns>
-// std::shared_ptr<SpriteSheet> loadSpriteSheet( const std::filesystem::path& filePath, std::span<const math::RectI> rects, const BlendMode& blendMode = BlendMode {} );
+std::shared_ptr<SpriteSheet> loadSpriteSheet( const std::filesystem::path& filePath, std::span<const math::RectI> rects, const BlendMode& blendMode = BlendMode {} );
 
 /// <summary>
 /// Loads a font from the specified file path and returns a shared pointer to the Font object.
