@@ -37,8 +37,14 @@ public:
     void destroy() noexcept;
 
     void close();
-
+    
     void clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 );
+
+    void clear( const Color& color )
+    {
+        clear( color.channels.r, color.channels.g, color.channels.b, color.channels.a );
+    }
+
     void present();
 
 void present( const Image& image );
@@ -59,6 +65,26 @@ void present( const Image& image );
 
     // Set this window as the current ImGui context.
     bool setCurrent();
+
+    /// <summary>
+    /// Convert coordinates from window client space to image space.
+    /// </summary>
+    /// <param name="x">The x-coordinate in window client space.</param>
+    /// <param name="y">The y-coordinate in window client space.</param>
+    /// <param name="image">The target image to convert coordinates for.</param>
+    /// <returns>The converted coordinates in image space.</returns>
+    glm::vec2 clientToImage( float x, float y, const Image& image ) const noexcept;
+
+    /// <summary>
+    /// Convert coordinates from window client space to image space.
+    /// </summary>
+    /// <param name="clientCoords">The coordinates in window client space.</param>
+    /// <param name="image">The target image to convert coordinates for.</param>
+    /// <returns>The converted coordinates in image space.</returns>
+    glm::vec2 clientToImage( const glm::vec2& clientCoords, const Image& image ) const noexcept
+    {
+        return clientToImage( clientCoords.x, clientCoords.y, image );
+    }
 
 private:
 static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
