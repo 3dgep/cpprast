@@ -11,7 +11,7 @@ int main()
     Window window( TITLE, SCREEN_WIDTH, SCREEN_HEIGHT );
 
     // Load an image from file.
-    Image image( "assets/images/Mona_Lisa.jpg" );
+    Image image( "assets/images/UV_checker_Map_byValle.jpg" );
 
     while ( window )
     {

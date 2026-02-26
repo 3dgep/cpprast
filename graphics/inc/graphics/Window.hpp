@@ -41,7 +41,7 @@ public:
     void clear( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 );
     void present();
 
-    void present( const Image& image );
+void present( const Image& image );
 
     void resize( int width, int height );
 
@@ -61,15 +61,15 @@ public:
     bool setCurrent();
 
 private:
-    static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
+static bool SDLCALL eventWatch( void* userdata, SDL_Event* event );
 
-    // Begin a new ImGui frame.
-    void beginFrame();
+// Begin a new ImGui frame.
+void beginFrame();
 
-    SDL_Window*   m_Window       = nullptr;
-    SDL_Renderer* m_Renderer     = nullptr;
-    SDL_Texture*  m_Texture      = nullptr;
-    ImGuiContext* m_ImGuiContext = nullptr;
+SDL_Window*   m_Window       = nullptr;
+SDL_Renderer* m_Renderer     = nullptr;
+SDL_Texture*  m_Texture      = nullptr;
+ImGuiContext* m_ImGuiContext = nullptr;
 
     int  m_Width      = -1;
     int  m_Height     = -1;

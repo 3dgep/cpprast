@@ -245,8 +245,8 @@ void Window::destroy() noexcept
         m_Window = nullptr;
     }
 
-    m_Width    = -1;
-    m_Height   = -1;
+    m_Width  = -1;
+    m_Height = -1;
 }
 
 void Window::close()
@@ -295,7 +295,7 @@ void Window::present()
 
 void Window::present( const Image& image )
 {
-    if ( !m_Window )
+    if ( !m_Renderer )  // Check for a valid renderer.
         return;
 
     float w, h;
