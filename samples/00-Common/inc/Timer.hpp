@@ -25,8 +25,15 @@ public:
     /// the timer to use the actual elapsed time between ticks.
     /// </summary>
     void setFixedTimeStep( double seconds ) noexcept;
-
     double getFixedTimeStep() const noexcept;
+
+    /// <summary>
+    /// Sets the maximum time step to prevent spiral of death when using a fixed time step.
+    /// This is a safety measure to prevent the timer from trying to catch up too much if the application was paused or running very slowly.
+    /// </summary>
+    /// <param name="seconds">The maximum time step in seconds.</param>
+    void   setMaxTimeStep( double seconds ) noexcept;
+    double getMaxTimeStep() const noexcept;
 
     /// <summary>
     /// Tick the timer. Pass an optional update function that will be called with the delta time (in seconds).
@@ -77,6 +84,10 @@ private:
     double fixedTimeStep = 0.0;
     // The accumulated time since the last update when using a fixed time step.
     double accumulatedTime = 0.0;
+    // The maximum time step to prevent spiral of death when using a fixed time step.
+    // This is a safety measure to prevent the timer from trying to catch up too much if the application was paused or running very slowly.
+    // By default, don't limit the time step, but users can set this using setMaxTimeStep to a reasonable value (e.g., 0.25 seconds) to prevent issues.
+    double maxTimeStep = std::numeric_limits<double>::max();
 
     uint64_t ticks = 0;
 };
