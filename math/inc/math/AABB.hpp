@@ -2,6 +2,7 @@
 
 #include "Rect.hpp"
 #include "Viewport.hpp"
+#include "OutCodes.hpp"
 
 #include <glm/common.hpp>  // For glm::min/glm::max
 #include <glm/vec2.hpp>
@@ -323,6 +324,156 @@ struct AABB
 
         return {};
     }
+
+    /// <summary>
+    /// Compute the outcode of a point.
+    /// Source: https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
+    /// </summary>
+    /// <param name="x">The x-component to test.</param>
+    /// <param name="y">The y-component to test.</param>
+    /// <returns>The OutCode of the point relative to this AABB.</returns>
+    OutCode computeOutCode( float x, float y ) const noexcept
+    {
+        OutCode code = OutCode::Inside;
+
+        if ( x < min.x )
+            code |= OutCode::Left;
+        else if ( x > max.x )
+            code |= OutCode::Right;
+
+        if ( y < min.y )
+            code |= OutCode::Bottom;
+        else if ( y > max.y )
+            code |= OutCode::Top;
+
+        return code;
+    }
+
+    /// <summary>
+    /// Compute the outcode of a point.
+    /// Source: https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
+    /// </summary>
+    /// <param name="p">The point to test.</param>
+    /// <returns>The OutCode of the point relative to this AABB.</returns>
+    OutCode computeOutCode( const glm::vec2& p ) const noexcept
+    {
+        return computeOutCode( p.x, p.y );
+    }
+
+    /// <summary>
+    /// Clip a 2D line to this AABB.
+    /// </summary>
+    /// <param name="x0">The x-coordinate of the first point of the line.</param>
+    /// <param name="y0">The y-coordinate of the first point of the line.</param>
+    /// <param name="x1">The x-coordinate of the second point of the line.</param>
+    /// <param name="y1">The y-coordinate of the second point fo the line.</param>
+    /// <seealso href="https://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm"/>
+    /// <returns>`true` if the line crosses the AABB, `false` if the line is completely outside of this AABB.</returns>
+    bool clip( float& x0, float& y0, float& x1, float& y1 ) const
+    {
+        bool accept = false;
+
+        do
+        {
+            OutCode oc0 = computeOutCode( x0, y0 );
+            OutCode oc1 = computeOutCode( x1, y1 );
+
+            if ( ( oc0 | oc1 ) == 0 )
+            {
+                // Both points are inside the image; trivially accept and exit loop.
+                accept = true;
+                break;
+            }
+            if ( ( oc0 & oc1 ) != 0 )
+            {
+                // Both points are outside the image and share an outside zone.
+                // So the entire line is outside the image.
+                break;
+            }
+
+            // Calculate the line segment to clip from an outside
+            // point to an intersection with the edge of the image.
+            const OutCode oc = oc0 > oc1 ? oc0 : oc1;
+
+            float x = 0.0f, y = 0.0f;
+
+            // Now find the intersection point.
+            if ( ( oc & OutCode::Top ) != 0 ) // Point is above the AABB
+            {
+                x = x0 + ( x1 - x0 ) * ( max.y - y0 ) / ( y1 - y0 );
+                y = max.y;
+            }
+            else if ( ( oc & OutCode::Bottom ) != 0 )  // Point is below the AABB
+            {
+                x = x0 + ( x1 - x0 ) * ( min.y - y0 ) / ( y1 - y0 );
+                y = min.y;
+            }
+            else if ( ( oc & OutCode::Right ) != 0 )  // Point is to the right of the AABB
+            {
+                y = y0 + ( y1 - y0 ) * ( max.x - x0 ) / ( x1 - x0 );
+                x = max.x;
+            }
+            else if ( ( oc & OutCode::Left ) != 0 )  // Point is to the left of the AABB
+            {
+                y = y0 + ( y1 - y0 ) * ( min.x - x0 ) / ( x1 - x0 );
+                x = min.x;
+            }
+
+            // Determine the point to replace based on the original outcode.
+            if ( oc == oc0 )
+            {
+                x0 = x;
+                y0 = y;
+            }
+            else
+            {
+                x1 = x;
+                y1 = y;
+            }
+        } while ( true );
+
+        return accept;
+    }
+
+    /// <summary>
+    /// Clip a 2D line to this AABB.
+    /// </summary>
+    /// <param name="x0">The x-coordinate of the first point of the line.</param>
+    /// <param name="y0">The y-coordinate of the first point of the line.</param>
+    /// <param name="x1">The x-coordinate of the second point of the line.</param>
+    /// <param name="y1">The y-coordinate of the second point fo the line.</param>
+    /// <returns>`true` if the line crosses the AABB, `false` if the line is completely outside of this AABB.</returns>
+    bool clip( int& x0, int& y0, int& x1, int& y1 ) const
+    {
+        float fx0 = static_cast<float>( x0 );
+        float fy0 = static_cast<float>( y0 );
+        float fx1 = static_cast<float>( x1 );
+        float fy1 = static_cast<float>( y1 );
+
+        if ( clip( fx0, fy0, fx1, fy1 ) )
+        {
+            x0 = static_cast<int>( fx0 );
+            y0 = static_cast<int>( fy0 );
+            x1 = static_cast<int>( fx1 );
+            y1 = static_cast<int>( fy1 );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Clip a 2D line to this AABB.
+    /// </summary>
+    /// <param name="p0">The first point of the line.</param>
+    /// <param name="p1">The second point of the line.</param>
+    /// <returns>`true` if the line crosses the AABB, `false` if the line is completely outside of this AABB.</returns>
+    bool clip( glm::vec2& p0, glm::vec2& p1 ) const
+    {
+        return clip( p0.x, p0.y, p1.x, p1.y );
+    }
+
 
     /// <summary>
     /// Construct an AABB from min & max points.

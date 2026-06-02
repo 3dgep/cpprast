@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.15...4.2)
 
 set( INC_FILES
     inc/math/AABB.hpp
+    inc/math/Line.hpp
     inc/math/Math.hpp
+    inc/math/OutCodes.hpp
     inc/math/Rect.hpp
     inc/math/Viewport.hpp
+    inc/math/bitmask_operators.hpp
 )
 
 set( SRC_FILES
