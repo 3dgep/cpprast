@@ -87,6 +87,7 @@ Window::operator bool() const
 
 void Window::create( std::string_view title, int width, int height, bool fullScreen )
 {
+    [[maybe_unused]]
     static SDL_Context& SDL_context = SDL_Context::get();  // Ensure a single, static context before creating an SDL window.
 
     if ( m_Window )

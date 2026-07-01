@@ -57,7 +57,7 @@ constexpr int fast_positive_mod( int x, int divisor ) noexcept
     }
 
     // For non-power-of-2, use optimized modulo
-    // This avoids the expensive division in the original fast_mod
+    // This avoids the expensive division in the original version
     return x >= 0 ? x % divisor : ( divisor + ( x % divisor ) ) % divisor;
 }
 
