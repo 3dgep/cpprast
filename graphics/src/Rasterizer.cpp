@@ -66,29 +66,30 @@ void Rasterizer::drawLineLow( int x0, int y0, int x1, int y1 ) const
     Image*    image     = state.colorTarget;
     BlendMode blendMode = state.blendMode;
 
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int yi = 1;
+    int dx = x1 - x0; // Delta X
+    int dy = y1 - y0; // Delta Y
+    int yi = 1;       // Y-increment
 
-    if ( dy < 0 )
+    if ( dy < 0 )     // If Delta Y is negative
     {
-        yi = -1;
-        dy = -dy;
+        yi = -1;      // Flip Y-increment
+        dy = -dy;     // Make dy positive
     }
 
-    int D = 2 * dy - dx;
+    int D = 2 * dy - dx; // Initial D
     int y = y0;
 
+    // If |slope| < 1, x always increases by 1.
     for ( int x = x0; x <= x1; ++x )
     {
         image->plot<false>( x, y, state.color, blendMode );
 
-        if ( D > 0 )
+        if ( D > 0 )     // e > 1/2: Line above midpoint
         {
-            y += yi;
-            D -= 2 * dx;
+            y += yi;     // Increment Y
+            D -= 2 * dx; // e -= 1
         }
-        D += 2 * dy;
+        D += 2 * dy;     // e += m
     }
 }
 
@@ -97,30 +98,30 @@ void Rasterizer::drawLineHigh( int x0, int y0, int x1, int y1 ) const
     Image*    image     = state.colorTarget;
     BlendMode blendMode = state.blendMode;
 
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int xi = 1;
+    int dx = x1 - x0; // Delta X
+    int dy = y1 - y0; // Delta Y
+    int xi = 1;       // X-increment
 
-    if ( dx < 0 )
+    if ( dx < 0 ) // If Delta X is negative
     {
-        xi = -1;
-        dx = -dx;
+        xi = -1;  // Flip X-increment
+        dx = -dx; // Make dx positive
     }
 
-    int D = 2 * dx - dy;
+    int D = 2 * dx - dy; // Initial D
     int x = x0;
 
+    // If |slope| > 1, y always increases by 1.
     for ( int y = y0; y <= y1; ++y )
     {
         image->plot<false>( x, y, state.color, blendMode );
 
-        if ( D > 0 )
+        if ( D > 0 )     // e > 1/2: Line to the right of midpoint
         {
-            x += xi;
-            D -= 2 * dy;
+            x += xi;     // Increment X
+            D -= 2 * dy; // e -= 1
         }
-
-        D += 2 * dx;
+        D += 2 * dx;     // e += m
     }
 }
 
