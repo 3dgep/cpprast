@@ -1,8 +1,8 @@
 #pragma once
 
+#include "OutCodes.hpp"
 #include "Rect.hpp"
 #include "Viewport.hpp"
-#include "OutCodes.hpp"
 
 #include <glm/common.hpp>  // For glm::min/glm::max
 #include <glm/vec2.hpp>
@@ -371,34 +371,24 @@ struct AABB
     /// <returns>`true` if the line crosses the AABB, `false` if the line is completely outside of this AABB.</returns>
     bool clip( float& x0, float& y0, float& x1, float& y1 ) const
     {
-        bool accept = false;
+        OutCode oc0 = computeOutCode( x0, y0 );
+        OutCode oc1 = computeOutCode( x1, y1 );
 
-        do
+        while ( true )
         {
-            OutCode oc0 = computeOutCode( x0, y0 );
-            OutCode oc1 = computeOutCode( x1, y1 );
-
             if ( ( oc0 | oc1 ) == 0 )
-            {
-                // Both points are inside the image; trivially accept and exit loop.
-                accept = true;
-                break;
-            }
+                return true;  // Trivial accept.
             if ( ( oc0 & oc1 ) != 0 )
-            {
-                // Both points are outside the image and share an outside zone.
-                // So the entire line is outside the image.
-                break;
-            }
+                return false;  // Trivial reject.
 
             // Calculate the line segment to clip from an outside
             // point to an intersection with the edge of the image.
-            const OutCode oc = oc0 > oc1 ? oc0 : oc1;
+            const OutCode oc = oc0 != OutCode::Inside ? oc0 : oc1;
 
             float x = 0.0f, y = 0.0f;
 
             // Now find the intersection point.
-            if ( ( oc & OutCode::Top ) != 0 ) // Point is above the AABB
+            if ( ( oc & OutCode::Top ) != 0 )  // Point is above the AABB
             {
                 x = x0 + ( x1 - x0 ) * ( max.y - y0 ) / ( y1 - y0 );
                 y = max.y;
@@ -422,17 +412,17 @@ struct AABB
             // Determine the point to replace based on the original outcode.
             if ( oc == oc0 )
             {
-                x0 = x;
-                y0 = y;
+                x0          = x;
+                y0          = y;
+                oc0 = computeOutCode( x0, y0 );
             }
             else
             {
-                x1 = x;
-                y1 = y;
+                x1          = x;
+                y1          = y;
+                oc1 = computeOutCode( x1, y1 );
             }
-        } while ( true );
-
-        return accept;
+        }
     }
 
     /// <summary>
@@ -473,7 +463,6 @@ struct AABB
     {
         return clip( p0.x, p0.y, p1.x, p1.y );
     }
-
 
     /// <summary>
     /// Construct an AABB from min & max points.

@@ -44,6 +44,7 @@ int main()
                     }
                     break;
                 case SDL_SCANCODE_C:
+                case SDL_SCANCODE_R:
                     image.clear( Color::Black );
                     break;
                 }  // switch (e.key.scancode)
